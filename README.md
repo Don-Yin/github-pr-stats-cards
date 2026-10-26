@@ -8,7 +8,7 @@ Cards for the pull requests you got merged into other people's repositories.
 [![Release](https://img.shields.io/github/v/release/Don-Yin/github-pr-stats-cards)](https://github.com/Don-Yin/github-pr-stats-cards/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-<img src="assets/wide.png" alt="Wide card" height="380">&nbsp;&nbsp;<img src="assets/narrow.png" alt="Narrow card" height="380">
+<img src="assets/wide.png" alt="Wide card" height="393">&nbsp;&nbsp;<img src="assets/narrow.png" alt="Narrow card" height="393">
 
 <sub>Wide card on desktop, narrow card on phones · [14 s demo](assets/demo.mp4)</sub>
 
