@@ -1,4 +1,4 @@
-name: Merged Contributions
+name: GitHub PR Stats Cards
 description: Render responsive SVG cards for merged public contributions.
 inputs:
   user:

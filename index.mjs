@@ -78,7 +78,7 @@ ${tiles || '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</tex
 export async function run(env = process.env) {
   const data = await contributions(env.INPUT_USER, env.INPUT_TOKEN || env.GITHUB_TOKEN);
   for (const [name, narrow] of [["wide", false], ["narrow", true]]) {
-    const path = `merged-card-${name}.svg`;
+    const path = `pr-stats-${name}.svg`;
     await writeFile(path, render(data, narrow));
     if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `${name}=${path}\n`);
   }
