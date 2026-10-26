@@ -1,0 +1,10 @@
+{
+  "name": "merged-card",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Responsive GitHub README cards for merged contributions.",
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "scripts": { "test": "node --test" }
+}

@@ -1,0 +1,21 @@
+name: Merged Contributions
+description: Render responsive SVG cards for merged public contributions.
+inputs:
+  user:
+    description: GitHub username whose merged pull requests are counted.
+    required: true
+  token:
+    description: GitHub API token; the workflow token can read public contributions.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  wide:
+    description: Path to the two-column SVG.
+  narrow:
+    description: Path to the one-column SVG.
+runs:
+  using: node24
+  main: index.mjs
+branding:
+  icon: git-pull-request
+  color: green
