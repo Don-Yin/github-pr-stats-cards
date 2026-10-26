@@ -1,17 +1,27 @@
+<div align="center">
+
 # github-pr-stats-cards
 
-I built this to show merged public pull requests outside my own repositories. Repositories are sorted by merged count, then stars. The action has no runtime dependencies. The SVGs embed their avatars, so displaying a card needs no external image requests.
+Cards for the pull requests you got merged into other people's repositories.
 
-<img src="assets/screenshot.png" alt="Merged contributions for Don-Yin" width="480">
+[![CI](https://github.com/Don-Yin/github-pr-stats-cards/actions/workflows/ci.yml/badge.svg)](https://github.com/Don-Yin/github-pr-stats-cards/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Don-Yin/github-pr-stats-cards)](https://github.com/Don-Yin/github-pr-stats-cards/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-A 14-second [demo](assets/demo.mp4) shows the wide and narrow cards.
+<img src="assets/wide.png" alt="Wide card" height="380">&nbsp;&nbsp;<img src="assets/narrow.png" alt="Narrow card" height="380">
+
+<sub>Wide card on desktop, narrow card on phones · [14 s demo](assets/demo.mp4)</sub>
+
+</div>
+
+Sorted by merged PRs, then stars. Private and your own repositories are skipped. Avatars are embedded, so the SVGs load with no extra requests.
 
 ## Usage
 
-Save this as `.github/workflows/pr-stats-cards.yml` in your profile repository.
+`.github/workflows/pr-stats-cards.yml` in your profile repository:
 
 ```yaml
-name: Merged contributions
+name: PR stats cards
 on:
   workflow_dispatch:
   schedule:
@@ -19,21 +29,21 @@ on:
 permissions:
   contents: write
 jobs:
-  card:
+  cards:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Don-Yin/github-pr-stats-cards@main
+      - uses: Don-Yin/github-pr-stats-cards@v1
         with:
           user: ${{ github.repository_owner }}
       - run: |
-          git add pr-stats-wide.svg pr-stats-narrow.svg
+          git add pr-stats-*.svg
           git diff --cached --quiet && exit 0
-          git -c user.name="$GITHUB_ACTOR" -c user.email="$GITHUB_ACTOR@users.noreply.github.com" commit -m "Update merged contributions"
+          git -c user.name="$GITHUB_ACTOR" -c user.email="$GITHUB_ACTOR@users.noreply.github.com" commit -m "Update PR stats cards"
           git push
 ```
 
-Add this to your README; the narrow card includes `owner/repo`, while the wide card uses repository names:
+Then in your README:
 
 ```html
 <picture>
@@ -42,15 +52,9 @@ Add this to your README; the narrow card includes `owner/repo`, while the wide c
 </picture>
 ```
 
-## Inputs
-
-| Input | Default | Meaning |
+| Input | Default | |
 | --- | --- | --- |
 | `user` | required | GitHub username |
-| `token` | `${{ github.token }}` | Token for the GitHub GraphQL API; public access is sufficient |
+| `token` | `github.token` | Public read access is enough |
 
-Outputs `wide` and `narrow` point to `pr-stats-wide.svg` and `pr-stats-narrow.svg` in the workspace. All pages are fetched; private repositories and repositories owned by `user` are excluded. API or avatar failures stop the action rather than publish an incomplete card.
-
-Local use: `INPUT_USER=Don-Yin INPUT_TOKEN="$(gh auth token)" node index.mjs` (Node 24+). Tests: `npm test`.
-
-MIT licensed.
+Run locally: `INPUT_USER=you INPUT_TOKEN="$(gh auth token)" node index.mjs`
