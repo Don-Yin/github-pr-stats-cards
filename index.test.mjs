@@ -58,4 +58,16 @@ test("invalid inputs and API/avatar failures never produce a partial card", asyn
   await assert.rejects(contributions("Don-Yin", "token", async url => url.endsWith("/graphql")
     ? json({ data: { user: { pullRequests: { nodes: [repo("a/b")], pageInfo: { hasNextPage: false } } } } })
     : new Response("not an image", { headers: { "content-type": "text/html" } })), /Could not load avatar/);
+  await assert.rejects(contributions("Don-Yin", "token", async () => new Response("", { status: 502 }), 0), /HTTP 502/);
+});
+
+test("a transient 502 is retried", async () => {
+  let calls = 0;
+  const data = await contributions("Don-Yin", "token", async url => {
+    if (!url.endsWith("/graphql")) return new Response(new Uint8Array([1]), { headers: { "content-type": "image/png" } });
+    return ++calls === 1 ? new Response("", { status: 502 })
+      : json({ data: { user: { pullRequests: { nodes: [repo("a/b")], pageInfo: { hasNextPage: false } } } } });
+  }, 0);
+  assert.equal(calls, 2);
+  assert.equal(data[0].repo, "a/b");
 });

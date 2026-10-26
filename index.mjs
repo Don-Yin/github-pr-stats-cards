@@ -15,16 +15,22 @@ const shorten = (text, width) => {
   return `${text}…`;
 };
 
-export async function contributions(user, token, request = fetch) {
+export async function contributions(user, token, request = fetch, retryDelay = 2000) {
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(user || "")) throw new Error("A valid GitHub user is required.");
   if (!token?.trim()) throw new Error("A GitHub token is required.");
   const repos = new Map(), avatars = new Map();
   let after = null;
   do {
-    const response = await request("https://api.github.com/graphql", {
-      method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables: { user, after } }), signal: AbortSignal.timeout(30000),
-    });
+    let response;
+    // GitHub's GraphQL endpoint returns occasional 502/503s; retry those twice before failing
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      if (attempt > 1) await new Promise(done => setTimeout(done, retryDelay * attempt));
+      response = await request("https://api.github.com/graphql", {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables: { user, after } }), signal: AbortSignal.timeout(30000),
+      });
+      if (response.status < 500) break;
+    }
     if (!response.ok) throw new Error(`GitHub API returned HTTP ${response.status}.`);
     const result = await response.json();
     if (result.errors?.length) throw new Error(result.errors.map(error => error.message).join("; "));
