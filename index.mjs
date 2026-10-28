@@ -63,6 +63,9 @@ export function render(data, narrow = false) {
   // the widest count and star label fix the icon columns, so every row lines up
   const mergeX = tileWidth - 26 - Math.max(1, ...data.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...data.map(d => compact(d.stars).length)) * 6 - 13;
   const nameWidth = starX - 42;
+  // star colour runs from grey to GitHub's star gold, on a log scale between the fewest and most stars shown, cubed so the top repos stand out
+  const logs = data.map(d => Math.log1p(d.stars)), low = Math.min(...logs), span = Math.max(...logs) - low || 1;
+  const starColour = s => "#" + [[0x6e, 0xe3], [0x76, 0xb3], [0x81, 0x41]].map(([a, b]) => Math.round(a + (b - a) * ((Math.log1p(s) - low) / span) ** 3).toString(16).padStart(2, "0")).join("");
   const tiles = data.map((d, i) => {
     const x = 14 + (i % columns) * (tileWidth + 5), y = 43 + Math.floor(i / columns) * 31;
     const count = String(d.merged), stars = compact(d.stars);
@@ -71,11 +74,11 @@ export function render(data, narrow = false) {
 <rect width="${tileWidth}" height="26" rx="6" fill="#161b22" stroke="#30363d"/>
 <clipPath id="avatar-${i}"><rect x="8" y="5" width="16" height="16" rx="4"/></clipPath><image x="8" y="5" width="16" height="16" href="${escape(d.avatar)}" clip-path="url(#avatar-${i})"/>
 <clipPath id="name-${i}"><rect x="30" y="0" width="${nameWidth}" height="26"/></clipPath><text x="30" y="17" clip-path="url(#name-${i})"><tspan fill="#8b949e">${escape(name.slice(0, slash))}</tspan>${escape(name.slice(slash))}</text>
-<g transform="translate(${starX} 8)" fill="#6e7681"><path d="m5.5 0 1.7 3.4 3.8.5-2.8 2.7.7 3.8-3.4-1.8-3.4 1.8.7-3.8L0 3.9l3.8-.5Z"/><text x="14" y="9" font-size="11">${stars}</text></g>
+<g transform="translate(${starX} 8)" fill="${starColour(d.stars)}"><path d="m5.5 0 1.7 3.4 3.8.5-2.8 2.7.7 3.8-3.4-1.8-3.4 1.8.7-3.8L0 3.9l3.8-.5Z"/><text x="14" y="9" font-size="11">${stars}</text></g>
 <g transform="translate(${mergeX} 6)" stroke="#3fb950" stroke-width="1.4" fill="none"><path d="M3 4v6m0-6c0 3 4 3 7 3"/><circle cx="3" cy="2" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="12" cy="7" r="2"/></g><text x="${tileWidth - 8}" y="17" text-anchor="end" fill="#3fb950">${count}</text></g>`;
   }).join("\n");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description">
-<title id="title">Merged Contributions</title><desc id="description">Merged public pull requests outside personal repositories, sorted by merged count then stars. Green merge icons show pull requests; grey stars show repository stars.</desc>
+<title id="title">Merged Contributions</title><desc id="description">Merged public pull requests outside personal repositories, sorted by merged count then stars. Green merge icons show pull requests; stars show repository stars, brighter gold for more stars.</desc>
 <rect width="${width}" height="${height}" fill="#0d1117"/>
 <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#c9d1d9"><text x="14" y="27" fill="#58a6ff" font-size="16" font-weight="600">Merged Contributions</text>
 ${tiles || '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</text>'}</g></svg>\n`;
