@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { contributions, render } from "./index.mjs";
+import { contributions, render, run } from "./index.mjs";
 
 const avatar = "data:image/png;base64,AQID";
 const repo = (name, stars = 1, isPrivate = false) => ({ repository: {
@@ -46,6 +46,17 @@ test("all pages, public external repositories, count/star ordering and cached in
   assert.doesNotMatch(wide, /foreignObject|href="https?:/);
   assert.match(render([{ repo: "a/<&\"'", stars: 1234, merged: 1, avatar }]), /a\/&lt;&amp;&quot;&#39;/);
   assert.match(render([]), /No merged contributions yet/);
+  const limited = render(data, true, 2);
+  assert.equal((limited.match(/href="data:image/g) || []).length, 2);
+  assert.match(limited, /\+2 more repositories · 2 merged pull requests/);
+  assert.match(limited, /width="368" height="132"/);
+  assert.doesNotMatch(render(data, true, 4), /more repositor/);
+  assert.match(render(data, false, 3), /\+1 more repository · 1 merged pull request</);
+});
+
+test("limit must be a whole number", async () => {
+  await assert.rejects(run({ INPUT_USER: "Don-Yin", INPUT_TOKEN: "t", INPUT_LIMIT: "twelve" }), /whole number/);
+  await assert.rejects(run({ INPUT_USER: "Don-Yin", INPUT_TOKEN: "t", INPUT_LIMIT: "-1" }), /whole number/);
 });
 
 test("invalid inputs and API/avatar failures never produce a partial card", async () => {

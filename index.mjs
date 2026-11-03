@@ -57,9 +57,13 @@ export async function contributions(user, token, request = fetch, retryDelay = 2
   return data;
 }
 
-export function render(data, narrow = false) {
+export function render(all, narrow = false, limit = 0) {
+  // limit 0 shows every repository; otherwise the rest are summed in one footer line
+  const data = limit ? all.slice(0, limit) : all, rest = all.slice(data.length);
   const width = narrow ? 368 : 480, columns = narrow ? 1 : 2, tileWidth = (width - 28 - (columns - 1) * 5) / columns;
-  const height = 52 + Math.max(1, Math.ceil(data.length / columns)) * 31;
+  const rowsEnd = 43 + Math.max(1, Math.ceil(data.length / columns)) * 31, height = rowsEnd + (rest.length ? 27 : 9);
+  const restMerged = rest.reduce((total, d) => total + d.merged, 0);
+  const footer = rest.length ? `<text x="${width / 2}" y="${rowsEnd + 12}" text-anchor="middle" fill="#8b949e">+${rest.length} more ${rest.length === 1 ? "repository" : "repositories"} · ${restMerged} merged ${restMerged === 1 ? "pull request" : "pull requests"}</text>` : "";
   // the widest count and star label fix the icon columns, so every row lines up
   const mergeX = tileWidth - 26 - Math.max(1, ...data.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...data.map(d => compact(d.stars).length)) * 6 - 13;
   const nameWidth = starX - 42;
@@ -81,14 +85,16 @@ export function render(data, narrow = false) {
 <title id="title">Merged Contributions</title><desc id="description">Merged public pull requests outside personal repositories, sorted by merged count then stars. Green merge icons show pull requests; stars show repository stars, brighter gold for more stars.</desc>
 <rect width="${width}" height="${height}" fill="#0d1117"/>
 <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#c9d1d9"><text x="14" y="27" fill="#58a6ff" font-size="16" font-weight="600">Merged Contributions</text>
-${tiles || '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</text>'}</g></svg>\n`;
+${tiles || '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</text>'}${footer}</g></svg>\n`;
 }
 
 export async function run(env = process.env) {
+  const limit = Number(env.INPUT_LIMIT || 16);
+  if (!Number.isInteger(limit) || limit < 0) throw new Error("limit must be a whole number; 0 shows every repository.");
   const data = await contributions(env.INPUT_USER, env.INPUT_TOKEN || env.GITHUB_TOKEN);
   for (const [name, narrow] of [["wide", false], ["narrow", true]]) {
     const path = `pr-stats-${name}.svg`;
-    await writeFile(path, render(data, narrow));
+    await writeFile(path, render(data, narrow, limit));
     if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `${name}=${path}\n`);
   }
   console.log(`Rendered ${data.reduce((total, repo) => total + repo.merged, 0)} merged pull requests across ${data.length} public repositories.`);

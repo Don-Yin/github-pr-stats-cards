@@ -8,6 +8,10 @@ inputs:
     description: GitHub API token; the workflow token can read public contributions.
     required: false
     default: ${{ github.token }}
+  limit:
+    description: Most repositories to show; the rest are summed in a footer line. 0 shows every repository.
+    required: false
+    default: "16"
 outputs:
   wide:
     description: Path to the two-column SVG.

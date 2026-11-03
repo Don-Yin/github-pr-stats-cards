@@ -70,6 +70,7 @@ To make the desktop card smaller, give the `<img>` a pixel width such as `width=
 | --- | --- | --- |
 | `user` | required | GitHub username |
 | `token` | `github.token` | Public read access is enough |
+| `limit` | `16` | Most repositories to show; the rest are summed in a footer line. `0` shows every repository |
 
 | Output | |
 | --- | --- |
