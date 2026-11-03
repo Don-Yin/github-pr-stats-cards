@@ -9,7 +9,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   limit:
-    description: Most repositories to show; the rest are counted in a "See all" footer line. 0 shows every repository.
+    description: Repositories on the main card; the rest go to the -more card. 0 puts every repository on the main card.
     required: false
     default: "16"
 outputs:
@@ -17,6 +17,10 @@ outputs:
     description: Path to the two-column SVG.
   narrow:
     description: Path to the one-column SVG.
+  wide-more:
+    description: Path to the two-column SVG of the repositories past the limit.
+  narrow-more:
+    description: Path to the one-column SVG of the repositories past the limit.
 runs:
   using: node24
   main: index.mjs

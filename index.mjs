@@ -57,23 +57,19 @@ export async function contributions(user, token, request = fetch, retryDelay = 2
   return data;
 }
 
-export function render(all, narrow = false, limit = 0) {
-  // limit 0 shows every repository; otherwise the rest are summed in one footer line
-  const data = limit ? all.slice(0, limit) : all, rest = all.slice(data.length);
+export function render(all, narrow = false, start = 0, end = all.length) {
+  // rows start..end of the list; a continuation (start > 0) has no title, so it reads as the rest of the first card
+  const data = all.slice(start, end), top = start ? 9 : 43;
   const width = narrow ? 368 : 480, columns = narrow ? 1 : 2, tileWidth = (width - 28 - (columns - 1) * 5) / columns;
-  const rowsEnd = 43 + Math.max(1, Math.ceil(data.length / columns)) * 31, height = rowsEnd + (rest.length ? 27 : 9);
-  const restMerged = rest.reduce((total, d) => total + d.merged, 0);
-  // the PR count is only worth stating when it differs from the repository count; "See all" is blue because the README links the card to every merged PR
-  const restText = `+${rest.length} more ${rest.length === 1 ? "repository" : "repositories"}${restMerged > rest.length ? ` (${restMerged} pull requests)` : ""}`;
-  const footer = rest.length ? `<text x="${width / 2}" y="${rowsEnd + 12}" text-anchor="middle" fill="#8b949e">${restText} · <tspan fill="#58a6ff">See all →</tspan></text>` : "";
-  // the widest count and star label fix the icon columns, so every row lines up
-  const mergeX = tileWidth - 26 - Math.max(1, ...data.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...data.map(d => compact(d.stars).length)) * 6 - 13;
+  const height = top + 9 + Math.max(start ? 0 : 1, Math.ceil(data.length / columns)) * 31;
+  // column widths and star colours come from the whole list, so both cards line up and share one colour scale
+  const mergeX = tileWidth - 26 - Math.max(1, ...all.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...all.map(d => compact(d.stars).length)) * 6 - 13;
   const nameWidth = starX - 42;
   // star colour runs from grey to GitHub's star gold, on a log scale between the fewest and most stars shown, cubed so the top repos stand out
-  const logs = data.map(d => Math.log1p(d.stars)), low = Math.min(...logs), span = Math.max(...logs) - low || 1;
+  const logs = all.map(d => Math.log1p(d.stars)), low = Math.min(...logs), span = Math.max(...logs) - low || 1;
   const starColour = s => "#" + [[0x6e, 0xe3], [0x76, 0xb3], [0x81, 0x41]].map(([a, b]) => Math.round(a + (b - a) * ((Math.log1p(s) - low) / span) ** 3).toString(16).padStart(2, "0")).join("");
   const tiles = data.map((d, i) => {
-    const x = 14 + (i % columns) * (tileWidth + 5), y = 43 + Math.floor(i / columns) * 31;
+    const x = 14 + (i % columns) * (tileWidth + 5), y = top + Math.floor(i / columns) * 31;
     const count = String(d.merged), stars = compact(d.stars);
     const name = shorten(narrow ? d.repo : d.repo.split("/")[1], nameWidth), slash = name.indexOf("/") + 1;
     return `<g transform="translate(${x} ${y})"><title>${escape(d.repo)}: ${count} merged pull requests; ${d.stars} stars</title>
@@ -86,18 +82,22 @@ export function render(all, narrow = false, limit = 0) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description">
 <title id="title">Merged Contributions</title><desc id="description">Merged public pull requests outside personal repositories, sorted by merged count then stars. Green merge icons show pull requests; stars show repository stars, brighter gold for more stars.</desc>
 <rect width="${width}" height="${height}" fill="#0d1117"/>
-<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#c9d1d9"><text x="14" y="27" fill="#58a6ff" font-size="16" font-weight="600">Merged Contributions</text>
-${tiles || '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</text>'}${footer}</g></svg>\n`;
+<g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#c9d1d9">${start ? "" : '<text x="14" y="27" fill="#58a6ff" font-size="16" font-weight="600">Merged Contributions</text>'}
+${tiles || (start ? "" : '<text x="14" y="61" fill="#8b949e">No merged contributions yet.</text>')}</g></svg>\n`;
 }
 
 export async function run(env = process.env) {
   const limit = Number(env.INPUT_LIMIT || 16);
   if (!Number.isInteger(limit) || limit < 0) throw new Error("limit must be a whole number; 0 shows every repository.");
   const data = await contributions(env.INPUT_USER, env.INPUT_TOKEN || env.GITHUB_TOKEN);
+  // the -more cards hold the repositories past the limit, for a <details> block that expands in place
+  const end = limit || data.length;
   for (const [name, narrow] of [["wide", false], ["narrow", true]]) {
-    const path = `pr-stats-${name}.svg`;
-    await writeFile(path, render(data, narrow, limit));
-    if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `${name}=${path}\n`);
+    for (const [suffix, start, stop] of [["", 0, end], ["-more", end, data.length]]) {
+      const path = `pr-stats-${name}${suffix}.svg`;
+      await writeFile(path, render(data, narrow, start, stop));
+      if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `${name}${suffix}=${path}\n`);
+    }
   }
   console.log(`Rendered ${data.reduce((total, repo) => total + repo.merged, 0)} merged pull requests across ${data.length} public repositories.`);
   return data;

@@ -55,28 +55,36 @@ jobs:
           git push
 ```
 
-Then in your README, with `YOU` replaced by your username. The link opens every merged pull request, which the card's "See all" footer points to:
+Then in your README. The `<details>` block shows the top repositories and expands in place to the rest:
 
 ```html
-<a href="https://github.com/search?q=author%3AYOU+is%3Apr+is%3Amerged+is%3Apublic&type=pullrequests">
+<div align="center">
   <picture>
     <source media="(max-width: 600px)" srcset="pr-stats-narrow.svg">
     <img src="pr-stats-wide.svg" alt="Merged Contributions">
   </picture>
-</a>
+  <details>
+    <summary>See all repositories</summary>
+    <picture>
+      <source media="(max-width: 600px)" srcset="pr-stats-narrow-more.svg">
+      <img src="pr-stats-wide-more.svg" alt="More merged contributions">
+    </picture>
+  </details>
+</div>
 ```
 
-To make the desktop card smaller, give the `<img>` a pixel width such as `width="400"`. A percentage width also shrinks the phone card, which then no longer fills the screen.
+To make the desktop card smaller, give both `<img>` tags the same pixel width, such as `width="400"`. A percentage width also shrinks the phone card, which then no longer fills the screen.
 
 | Input | Default | |
 | --- | --- | --- |
 | `user` | required | GitHub username |
 | `token` | `github.token` | Public read access is enough |
-| `limit` | `16` | Most repositories to show; the rest are counted in a "See all" footer line. `0` shows every repository |
+| `limit` | `16` | Repositories on the main card; the rest go to the `-more` card. `0` puts every repository on the main card |
 
 | Output | |
 | --- | --- |
 | `wide` | Path to the two-column SVG |
 | `narrow` | Path to the one-column SVG |
+| `wide-more`, `narrow-more` | The repositories past `limit`, without a title |
 
 Run locally: `INPUT_USER=you INPUT_TOKEN="$(gh auth token)" node index.mjs`
