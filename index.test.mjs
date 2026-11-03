@@ -48,10 +48,11 @@ test("all pages, public external repositories, count/star ordering and cached in
   assert.match(render([]), /No merged contributions yet/);
   const limited = render(data, true, 2);
   assert.equal((limited.match(/href="data:image/g) || []).length, 2);
-  assert.match(limited, /\+2 more repositories · 2 merged pull requests/);
+  assert.match(limited, /\+2 more repositories · <tspan fill="#58a6ff">See all/);
+  assert.match(render([...data].reverse(), true, 3), /\+1 more repository \(2 pull requests\) · /);
   assert.match(limited, /width="368" height="132"/);
   assert.doesNotMatch(render(data, true, 4), /more repositor/);
-  assert.match(render(data, false, 3), /\+1 more repository · 1 merged pull request</);
+  assert.match(render(data, false, 3), /\+1 more repository · </);
 });
 
 test("limit must be a whole number", async () => {

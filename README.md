@@ -55,13 +55,15 @@ jobs:
           git push
 ```
 
-Then in your README:
+Then in your README, with `YOU` replaced by your username. The link opens every merged pull request, which the card's "See all" footer points to:
 
 ```html
-<picture>
-  <source media="(max-width: 600px)" srcset="pr-stats-narrow.svg">
-  <img src="pr-stats-wide.svg" alt="Merged Contributions">
-</picture>
+<a href="https://github.com/search?q=author%3AYOU+is%3Apr+is%3Amerged+is%3Apublic&type=pullrequests">
+  <picture>
+    <source media="(max-width: 600px)" srcset="pr-stats-narrow.svg">
+    <img src="pr-stats-wide.svg" alt="Merged Contributions">
+  </picture>
+</a>
 ```
 
 To make the desktop card smaller, give the `<img>` a pixel width such as `width="400"`. A percentage width also shrinks the phone card, which then no longer fills the screen.
@@ -70,7 +72,7 @@ To make the desktop card smaller, give the `<img>` a pixel width such as `width=
 | --- | --- | --- |
 | `user` | required | GitHub username |
 | `token` | `github.token` | Public read access is enough |
-| `limit` | `16` | Most repositories to show; the rest are summed in a footer line. `0` shows every repository |
+| `limit` | `16` | Most repositories to show; the rest are counted in a "See all" footer line. `0` shows every repository |
 
 | Output | |
 | --- | --- |

@@ -63,7 +63,9 @@ export function render(all, narrow = false, limit = 0) {
   const width = narrow ? 368 : 480, columns = narrow ? 1 : 2, tileWidth = (width - 28 - (columns - 1) * 5) / columns;
   const rowsEnd = 43 + Math.max(1, Math.ceil(data.length / columns)) * 31, height = rowsEnd + (rest.length ? 27 : 9);
   const restMerged = rest.reduce((total, d) => total + d.merged, 0);
-  const footer = rest.length ? `<text x="${width / 2}" y="${rowsEnd + 12}" text-anchor="middle" fill="#8b949e">+${rest.length} more ${rest.length === 1 ? "repository" : "repositories"} · ${restMerged} merged ${restMerged === 1 ? "pull request" : "pull requests"}</text>` : "";
+  // the PR count is only worth stating when it differs from the repository count; "See all" is blue because the README links the card to every merged PR
+  const restText = `+${rest.length} more ${rest.length === 1 ? "repository" : "repositories"}${restMerged > rest.length ? ` (${restMerged} pull requests)` : ""}`;
+  const footer = rest.length ? `<text x="${width / 2}" y="${rowsEnd + 12}" text-anchor="middle" fill="#8b949e">${restText} · <tspan fill="#58a6ff">See all →</tspan></text>` : "";
   // the widest count and star label fix the icon columns, so every row lines up
   const mergeX = tileWidth - 26 - Math.max(1, ...data.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...data.map(d => compact(d.stars).length)) * 6 - 13;
   const nameWidth = starX - 42;
