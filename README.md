@@ -44,7 +44,7 @@ jobs:
   cards:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: Don-Yin/github-pr-stats-cards@v1
         with:
           user: ${{ github.repository_owner }}
