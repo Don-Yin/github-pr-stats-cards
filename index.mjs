@@ -65,7 +65,7 @@ export function render(all, narrow = false, start = 0, end = all.length) {
   // column widths and star colours come from the whole list, so both cards line up and share one colour scale
   const mergeX = tileWidth - 26 - Math.max(1, ...all.map(d => String(d.merged).length)) * 7, starX = mergeX - 10 - Math.max(1, ...all.map(d => compact(d.stars).length)) * 6 - 13;
   const nameWidth = starX - 42;
-  // star colour runs from grey to GitHub's star gold, on a log scale between the fewest and most stars shown, cubed so the top repos stand out
+  // star colour runs from grey to GitHub's star gold, on a log scale between the fewest and most stars in the whole list, cubed so the top repos stand out
   const logs = all.map(d => Math.log1p(d.stars)), low = Math.min(...logs), span = Math.max(...logs) - low || 1;
   const starColour = s => "#" + [[0x6e, 0xe3], [0x76, 0xb3], [0x81, 0x41]].map(([a, b]) => Math.round(a + (b - a) * ((Math.log1p(s) - low) / span) ** 3).toString(16).padStart(2, "0")).join("");
   const tiles = data.map((d, i) => {
@@ -88,7 +88,7 @@ ${tiles || (start ? "" : '<text x="14" y="61" fill="#8b949e">No merged contribut
 
 export async function run(env = process.env) {
   const limit = Number(env.INPUT_LIMIT || 16);
-  if (!Number.isInteger(limit) || limit < 0) throw new Error("limit must be a whole number; 0 shows every repository.");
+  if (!Number.isInteger(limit) || limit < 0) throw new Error("limit must be a whole number; 0 puts every repository on the main card.");
   const data = await contributions(env.INPUT_USER, env.INPUT_TOKEN || env.GITHUB_TOKEN);
   // the -more cards hold the repositories past the limit, for a <details> block that expands in place
   const end = limit || data.length;
