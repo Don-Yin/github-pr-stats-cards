@@ -77,6 +77,7 @@ export function render(data, narrow = false) {
 <g transform="translate(${mergeX} 6)" stroke="#3fb950" stroke-width="1.4" fill="none"><path d="M3 4v6m0-6c0 3 4 3 7 3"/><circle cx="3" cy="2" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="12" cy="7" r="2"/></g><text x="${tileWidth - 8}" y="17" text-anchor="end" fill="#3fb950">${count}</text></g>`;
   }).join("\n");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description">
+<style>@media (prefers-color-scheme: light) { rect[fill="#0d1117"] { fill: #fff } rect[fill="#161b22"] { fill: #f6f8fa; stroke: #d0d7de } g[fill="#c9d1d9"] { fill: #1f2328 } [fill="#8b949e"] { fill: #59636e } [fill="#58a6ff"] { fill: #0969da } [fill="#3fb950"] { fill: #1a7f37 } [stroke="#3fb950"] { stroke: #1a7f37 } }</style>
 <title id="title">Merged Contributions</title><desc id="description">Merged public pull requests outside personal repositories, sorted by merged count then stars. Green merge icons show pull requests; stars show repository stars, brighter gold for more stars.</desc>
 <rect width="${width}" height="${height}" fill="#0d1117"/>
 <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#c9d1d9"><text x="14" y="27" fill="#58a6ff" font-size="16" font-weight="600">Merged Contributions</text>

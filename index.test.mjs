@@ -44,6 +44,7 @@ test("all pages, public external repositories, count/star ordering and cached in
   assert.match(narrow, /<tspan fill="#8b949e">outside\//);
   assert.equal((wide.match(/href="data:image\/png;base64,/g) || []).length, 4);
   assert.doesNotMatch(wide, /foreignObject|href="https?:/);
+  assert.match(wide, /@media \(prefers-color-scheme: light\) \{ rect\[fill="#0d1117"\] \{ fill: #fff \}/);
   assert.match(render([{ repo: "a/<&\"'", stars: 1234, merged: 1, avatar }]), /a\/&lt;&amp;&quot;&#39;/);
   assert.match(render([]), /No merged contributions yet/);
 });

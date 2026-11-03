@@ -11,7 +11,7 @@ Show the pull requests you got merged into other people's repositories.
 
 <img src="assets/hero.png" alt="The wide card in a desktop browser and the narrow card on a phone" width="100%">
 
-<sub>[14 s demo](assets/demo.mp4) · [live on my profile](https://github.com/Don-Yin)</sub>
+<sub>[live on my profile](https://github.com/Don-Yin)</sub>
 
 </div>
 
@@ -19,6 +19,7 @@ Show the pull requests you got merged into other people's repositories.
 
 - **Other people's repositories only.** Private repositories and your own are skipped, so the card shows outside contributions.
 - **Fits every screen.** A two-column card for desktop and a one-column card for phones, switched by `<picture>`.
+- **Light and dark.** The card follows the reader's colour scheme.
 - **Self-contained SVGs.** Avatars are embedded, so the cards load with no extra requests.
 - **Runs in your own workflow.** No hosted service and no shared rate limit; the default workflow token is enough.
 
@@ -78,3 +79,5 @@ To make the desktop card smaller, give the `<img>` a pixel width, such as `width
 | `narrow` | Path to the one-column SVG |
 
 Run locally: `INPUT_USER=you INPUT_TOKEN="$(gh auth token)" node index.mjs`
+
+Regenerate the README images: `INPUT_USER=you INPUT_TOKEN="$(gh auth token)" node scripts/make-assets.mjs` (needs `rsvg-convert`)
