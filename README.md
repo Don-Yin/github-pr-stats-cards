@@ -55,36 +55,26 @@ jobs:
           git push
 ```
 
-Then in your README. The `<details>` block shows the top repositories and expands in place to the rest:
+Then in your README:
 
 ```html
-<div align="center">
-  <picture>
-    <source media="(max-width: 600px)" srcset="pr-stats-narrow.svg">
-    <img src="pr-stats-wide.svg" alt="Merged Contributions">
-  </picture>
-  <details>
-    <summary>See all repositories</summary>
-    <picture>
-      <source media="(max-width: 600px)" srcset="pr-stats-narrow-more.svg">
-      <img src="pr-stats-wide-more.svg" alt="More merged contributions">
-    </picture>
-  </details>
-</div>
+<picture>
+  <source media="(max-width: 600px)" srcset="pr-stats-narrow.svg">
+  <img src="pr-stats-wide.svg" alt="Merged Contributions">
+</picture>
 ```
 
-To make the desktop card smaller, give both `<img>` tags the same pixel width, such as `width="400"`. A percentage width also shrinks the phone card, which then no longer fills the screen.
+To make the desktop card smaller, give the `<img>` a pixel width, such as `width="400"`. A percentage width also shrinks the phone card, which then no longer fills the screen.
 
 | Input | Default | |
 | --- | --- | --- |
 | `user` | required | GitHub username |
 | `token` | `github.token` | Public read access is enough |
-| `limit` | `16` | Repositories on the main card; the rest go to the `-more` card. `0` puts every repository on the main card |
+| `limit` | `0` | Show only the top N repositories; `0` shows every repository |
 
 | Output | |
 | --- | --- |
 | `wide` | Path to the two-column SVG |
 | `narrow` | Path to the one-column SVG |
-| `wide-more`, `narrow-more` | The repositories past `limit`, without a title |
 
 Run locally: `INPUT_USER=you INPUT_TOKEN="$(gh auth token)" node index.mjs`

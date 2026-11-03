@@ -46,17 +46,6 @@ test("all pages, public external repositories, count/star ordering and cached in
   assert.doesNotMatch(wide, /foreignObject|href="https?:/);
   assert.match(render([{ repo: "a/<&\"'", stars: 1234, merged: 1, avatar }]), /a\/&lt;&amp;&quot;&#39;/);
   assert.match(render([]), /No merged contributions yet/);
-  const first = render(data, true, 0, 2), more = render(data, true, 2);
-  assert.equal((first.match(/href="data:image/g) || []).length, 2);
-  assert.match(first, /width="368" height="114"/);
-  assert.equal((more.match(/href="data:image/g) || []).length, 2);
-  assert.match(more, /width="368" height="80"/);
-  assert.doesNotMatch(more, /Merged Contributions<\/text>|No merged contributions/);
-  assert.match(more, /translate\(14 9\)/);
-  // both halves share column positions and the star colour scale of the whole list
-  assert.equal(first.match(/translate\((\d+) 6\)/)[1], more.match(/translate\((\d+) 6\)/)[1]);
-  assert.match(more, /fill="#6e7681"/);
-  assert.match(render(data, true, 4), /width="368" height="18"/);
 });
 
 test("limit must be a whole number", async () => {
