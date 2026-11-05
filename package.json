@@ -1,6 +1,6 @@
 {
   "name": "github-pr-stats-cards",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "description": "Responsive GitHub README cards for merged contributions.",

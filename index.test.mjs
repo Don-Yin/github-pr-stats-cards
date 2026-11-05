@@ -58,11 +58,12 @@ test("clickable mode: one sprite with a view per repository and a README block w
   assert.deepEqual(sprite.match(/<view id="[^"]+"/g), ['<view id="heading"', '<view id="r-a--one"', '<view id="r-b--two"', '<view id="r-c--three"']);
   assert.match(sprite, /<view id="r-b--two" viewBox="-2\.5 64\.5 228\.5 31"\/>/);
   assert.match(renderSprite(data, true), /<tspan fill="#8b949e">a\/<\/tspan>one/);
-  const block = section(data, "./metrics");
-  assert.deepEqual(block.match(/<a href="[^"]+"/g), ['<a href="https://github.com/Don-Yin/github-pr-stats-cards"', '<a href="https://github.com/a/one"', '<a href="https://github.com/b/two"', '<a href="https://github.com/c/three"']);
+  const block = section(data, "./metrics", "me");
+  const prs = repo => `<a href="https://github.com/${repo}/pulls?q=is%3Apr%20is%3Amerged%20author%3Ame"`;
+  assert.deepEqual(block.match(/<a href="[^"]+"/g), ['<a href="https://github.com/Don-Yin/github-pr-stats-cards"', prs("a/one"), prs("b/two"), prs("c/three")]);
   assert.match(block, /srcset="\.\/metrics\/pr-stats-narrow\.svg#r-a--one" width="368"><img align="top" alt="a\/one: 3 merged pull requests, 10 stars" src="\.\/metrics\/pr-stats-wide\.svg#r-a--one" width="196">/);
   assert.equal(block.split("\n").filter(line => line.endsWith("<br>")).length, 3, "heading line, then rows of two");
-  assert.match(section([]), /No merged contributions yet/);
+  assert.match(section([], ".", "me"), /No merged contributions yet/);
   const text = "intro\n<!-- pr-stats:start -->\nold\n<!-- pr-stats:end -->\noutro\n";
   assert.equal(updateReadme(updateReadme(text, "<!-- pr-stats:start -->x<!-- pr-stats:end -->"), "<!-- pr-stats:start -->x<!-- pr-stats:end -->"), "intro\n<!-- pr-stats:start -->x<!-- pr-stats:end -->\noutro\n");
   assert.throws(() => updateReadme("no markers", "x"), /needs <!-- pr-stats:start -->/);

@@ -20,7 +20,7 @@ Show the pull requests you got merged into other people's repositories.
 - **Other people's repositories only.** Private repositories and your own are skipped, so the card shows outside contributions.
 - **Fits every screen.** A two-column card for desktop and a one-column card for phones, switched by `<picture>`.
 - **Light and dark.** The card follows the reader's colour scheme.
-- **Click a repository.** Optionally, each repository links to itself, still from one SVG download.
+- **Click a repository.** Optionally, each repository links to your merged pull requests there, still from one SVG download.
 - **Self-contained SVGs.** Avatars are embedded, so the cards load with no extra requests.
 - **Runs in your own workflow.** No hosted service and no shared rate limit; the default workflow token is enough.
 

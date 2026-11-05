@@ -111,14 +111,14 @@ ${views}
 ${tiles}</g></svg>\n`;
 }
 
-// The README block: one link per repository, two tiles per line on wide screens and one on phones.
+// The README block: one link per repository, to the user's merged pull requests there, two tiles per line on wide screens and one on phones.
 // align="top" (kept by GitHub) takes the images off the text baseline, and a row's tiles touch, so the only gaps are the sprite's own.
 export const markers = ["<!-- pr-stats:start -->", "<!-- pr-stats:end -->"];
-export function section(data, dir = ".") {
+export function section(data, dir, user) {
   const cell = (href, id, alt, wide, narrow) => `<a href="${href}"><picture><source media="(max-width: 600px)" srcset="${dir}/pr-stats-narrow.svg#${id}" width="${narrow}"><img align="top" alt="${escape(alt)}" src="${dir}/pr-stats-wide.svg#${id}" width="${wide}"></picture></a>`;
   const rows = [];
   for (let i = 0; i < data.length; i += 2) {
-    rows.push(data.slice(i, i + 2).map(d => cell(`https://github.com/${d.repo}`, viewId(d.repo), `${d.repo}: ${d.merged} merged pull requests, ${d.stars} stars`, 196, 368)).join("") + "<br>");
+    rows.push(data.slice(i, i + 2).map(d => cell(`https://github.com/${d.repo}/pulls?q=${encodeURIComponent(`is:pr is:merged author:${user}`)}`, viewId(d.repo), `${d.repo}: ${d.merged} merged pull requests, ${d.stars} stars`, 196, 368)).join("") + "<br>");
   }
   return `${markers[0]}
 <div align="center">
@@ -149,7 +149,7 @@ export async function run(env = process.env) {
   }
   if (readme) {
     const link = `./${relative(dirname(resolve(readme)), resolve(dir)).split(sep).join(posix.sep)}`.replace(/\/$/, "");
-    await writeFile(readme, updateReadme(text, section(shown, link)));
+    await writeFile(readme, updateReadme(text, section(shown, link, env.INPUT_USER)));
   }
   console.log(`Rendered ${data.reduce((total, repo) => total + repo.merged, 0)} merged pull requests across ${data.length} public repositories.`);
   return data;
