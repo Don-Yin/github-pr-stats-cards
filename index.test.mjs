@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { contributions, render, run } from "./index.mjs";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { contributions, render, renderSprite, run, section, updateReadme } from "./index.mjs";
 
 const avatar = "data:image/png;base64,AQID";
 const repo = (name, stars = 1, isPrivate = false) => ({ repository: {
@@ -47,6 +50,26 @@ test("all pages, public external repositories, count/star ordering and cached in
   assert.match(wide, /@media \(prefers-color-scheme: light\) \{ rect\[fill="#0d1117"\] \{ fill: #fff \}/);
   assert.match(render([{ repo: "a/<&\"'", stars: 1234, merged: 1, avatar }]), /a\/&lt;&amp;&quot;&#39;/);
   assert.match(render([]), /No merged contributions yet/);
+});
+
+test("clickable mode: one sprite with a view per repository and a README block with one link each", async () => {
+  const data = ["a/one", "b/two", "c/three"].map((repo, i) => ({ repo, stars: 10 - i, merged: 3 - i, avatar }));
+  const sprite = renderSprite(data);
+  assert.deepEqual(sprite.match(/<view id="[^"]+"/g), ['<view id="heading"', '<view id="r-a--one"', '<view id="r-b--two"', '<view id="r-c--three"']);
+  assert.match(sprite, /<view id="r-b--two" viewBox="-2\.5 64\.5 228\.5 31"\/>/);
+  assert.match(renderSprite(data, true), /<tspan fill="#8b949e">a\/<\/tspan>one/);
+  const block = section(data, "./metrics");
+  assert.deepEqual(block.match(/<a href="[^"]+"/g), ['<a href="https://github.com/Don-Yin/github-pr-stats-cards"', '<a href="https://github.com/a/one"', '<a href="https://github.com/b/two"', '<a href="https://github.com/c/three"']);
+  assert.match(block, /srcset="\.\/metrics\/pr-stats-narrow\.svg#r-a--one" width="368"><img align="top" alt="a\/one: 3 merged pull requests, 10 stars" src="\.\/metrics\/pr-stats-wide\.svg#r-a--one" width="196">/);
+  assert.equal(block.split("\n").filter(line => line.endsWith("<br>")).length, 3, "heading line, then rows of two");
+  assert.match(section([]), /No merged contributions yet/);
+  const text = "intro\n<!-- pr-stats:start -->\nold\n<!-- pr-stats:end -->\noutro\n";
+  assert.equal(updateReadme(updateReadme(text, "<!-- pr-stats:start -->x<!-- pr-stats:end -->"), "<!-- pr-stats:start -->x<!-- pr-stats:end -->"), "intro\n<!-- pr-stats:start -->x<!-- pr-stats:end -->\noutro\n");
+  assert.throws(() => updateReadme("no markers", "x"), /needs <!-- pr-stats:start -->/);
+  const dir = await mkdtemp(join(tmpdir(), "pr-stats-")), readme = join(dir, "README.md");
+  await writeFile(readme, "no markers\n");
+  await assert.rejects(run({ INPUT_USER: "Don-Yin", INPUT_TOKEN: "t", INPUT_README: readme }), /needs <!-- pr-stats:start -->/);
+  assert.equal(await readFile(readme, "utf8"), "no markers\n");
 });
 
 test("limit must be a whole number", async () => {

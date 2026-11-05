@@ -12,11 +12,22 @@ inputs:
     description: Show only the top N repositories; 0 shows every repository.
     required: false
     default: "0"
+  readme:
+    description: >-
+      README to rewrite between <!-- pr-stats:start --> and
+      <!-- pr-stats:end --> with one link per repository;
+      empty keeps the single card.
+    required: false
+    default: ""
+  dir:
+    description: Folder for the SVG files.
+    required: false
+    default: "."
 outputs:
   wide:
-    description: Path to the two-column SVG.
+    description: Path to the wide SVG.
   narrow:
-    description: Path to the one-column SVG.
+    description: Path to the narrow SVG.
 runs:
   using: node24
   main: index.mjs
